@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Bar PDV",
+    "slug": "bar-pdv",
+    "scheme": "barpdv",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "plugins": ["expo-router", "expo-secure-store"],
+    "android": { "package": "com.example.barpdv" },
+    "ios": { "bundleIdentifier": "com.example.barpdv" }
+  }
+}

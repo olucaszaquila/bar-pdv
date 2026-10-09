@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Papel {
+  ADMIN
+  GARCOM
+  COZINHA
+  CAIXA
+}
+
+enum Destino {
+  COZINHA
+  BAR
+}
+
+enum ComandaStatus {
+  ABERTA
+  FECHADA
+}
+
+enum ItemStatus {
+  PENDENTE
+  EM_PREPARO
+  PRONTO
+  ENTREGUE
+  CANCELADO
+}
+
+enum FormaPagamento {
+  DINHEIRO
+  PIX
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+}
+
+// Multi-tenant: todo registro pertence a um Estabelecimento (estabelecimentoId).
+model Estabelecimento {
+  id         String   @id @default(cuid())
+  nome       String
+  criadoEm   DateTime @default(now())
+  usuarios   Usuario[]
+  categorias Categoria[]
+  produtos   Produto[]
+  mesas      Mesa[]
+  comandas   Comanda[]
+  itens      ItemComanda[]
+  pagamentos Pagamento[]
+  eventos    EventoComanda[]
+}
+
+model Usuario {
+  id                String   @id @default(cuid())
+  estabelecimentoId String
+  nome              String
+  email             String   @unique
+  senhaHash         String
+  papel             Papel
+  ativo             Boolean  @default(true)
+  criadoEm          DateTime @default(now())
+
+  estabelecimento Estabelecimento @relation(fields: [estabelecimentoId], references: [id])
+  comandas        Comanda[]
+  eventos         EventoComanda[]
+}
+
+model Categoria {
+  id                String @id @default(cuid())
+  estabelecimentoId String
+  nome              String
+  ordem             Int    @default(0)
+
+  estabelecimento Estabelecimento @relation(fields: [estabelecimentoId], references: [id])
+  produtos        Produto[]
+
+  @@index([estabelecimentoId])
+}
+
+model Produto {
+  id                String  @id @default(cuid())
+  estabelecimentoId String
+  categoriaId       String
+  nome              String
+  precoCentavos     Int
+  destino           Destino
+  ativo             Boolean @default(true)
+
+  estabelecimento Estabelecimento @relation(fields: [estabelecimentoId], references: [id])
+  categoria       Categoria       @relation(fields: [categoriaId], references: [id])
+  itens           ItemComanda[]
+
+  @@index([estabelecimentoId])
+}
+
+model Mesa {
+  id                String @id @default(cuid())
+  estabelecimentoId String
+  numero            Int
+
+  estabelecimento Estabelecimento @relation(fields: [estabelecimentoId], references: [id])
+  comandas        Comanda[]
+
+  @@unique([estabelecimentoId, numero])
+}
+
+model Comanda {
+  id                String        @id @default(cuid())
+  estabelecimentoId String
+  mesaId            String
+  garcomId          String
+  nomeCliente       String?
+  status            ComandaStatus @default(ABERTA)
+  taxaServicoPct    Int           @default(10)
+  abertaEm          DateTime      @default(now())
+  fechadaEm         DateTime?
+
+  estabelecimento Estabelecimento @relation(fields: [estabelecimentoId], references: [id])
+  mesa            Mesa            @relation(fields: [mesaId], references: [id])
+  garcom          Usuario         @relation(fields: [garcomId], references: [id])
+  itens           ItemComanda[]
+  pagamentos      Pagamento[]
+  eventos         EventoComanda[]
+
+  @@index([estabelecimentoId, status])
+  @@index([mesaId, status])
+}
+
+// Guarda snapshot de nome e preço: mudar o cardápio não altera contas antigas.
+model ItemComanda {
+  id                String     @id @default(cuid())
+  estabelecimentoId String
+  comandaId         String
+  produtoId         String
+  nomeProduto       String
+  precoCentavos     Int
+  quantidade        Int
+  observacao        String?
+  destino           Destino
+  status            ItemStatus @default(PENDENTE)
+  criadoEm          DateTime   @default(now())
+  atualizadoEm      DateTime   @updatedAt
+
+  estabelecimento Estabelecimento @relation(fields: [estabelecimentoId], references: [id])
+  comanda         Comanda         @relation(fields: [comandaId], references: [id])
+  produto         Produto         @relation(fields: [produtoId], references: [id])
+
+  @@index([estabelecimentoId, status, destino])
+  @@index([comandaId])
+}
+
+model Pagamento {
+  id                String         @id @default(cuid())
+  estabelecimentoId String
+  comandaId         String
+  forma             FormaPagamento
+  valorCentavos     Int
+  criadoEm          DateTime       @default(now())
+
+  estabelecimento Estabelecimento @relation(fields: [estabelecimentoId], references: [id])
+  comanda         Comanda         @relation(fields: [comandaId], references: [id])
+}
+
+// Trilha de auditoria: quem fez o quê e quando (cancelamentos, descontos, fechamentos).
+model EventoComanda {
+  id                String   @id @default(cuid())
+  estabelecimentoId String
+  comandaId         String
+  usuarioId         String
+  tipo              String
+  dados             Json?
+  criadoEm          DateTime @default(now())
+
+  estabelecimento Estabelecimento @relation(fields: [estabelecimentoId], references: [id])
+  comanda         Comanda         @relation(fields: [comandaId], references: [id])
+  usuario         Usuario         @relation(fields: [usuarioId], references: [id])
+
+  @@index([comandaId])
+}
