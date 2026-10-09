@@ -9,6 +9,12 @@ export default function Mesas() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { data = [] } = useQuery({ queryKey: ['mesas'], queryFn: () => api<MesaResumo[]>('/mesas') });
+  const anotar = useMutation({
+    mutationFn: ({ mesaId, anotacao }: { mesaId: string; anotacao: string }) =>
+      api<MesaResumo>(`/mesas/${mesaId}/anotacao`, { method: 'PATCH', body: { anotacao } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['mesas'] }),
+    onError: (e: Error) => alert(e.message),
+  });
   const adicionar = useMutation({
     mutationFn: () => api<MesaResumo>('/mesas', { method: 'POST' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['mesas'] }),
@@ -32,21 +38,35 @@ export default function Mesas() {
       </div>
       <div className="grid">
         {data.map((m) => (
-          <button
-            key={m.id}
-            className={`mesa ${m.comanda ? 'ocupada' : 'livre'}`}
-            onClick={() => (m.comanda ? nav(`/comandas/${m.comanda.id}`) : abrir.mutate(m.id))}
-          >
-            <span className="num">{m.numero}</span>
-            {m.comanda ? (
-              <>
-                <small>{m.comanda.nomeCliente ?? 'Ocupada'}</small>
-                <b>{formatarBRL(m.comanda.total)}</b>
-              </>
-            ) : (
-              <small>Livre</small>
+          <div key={m.id} className={`mesa ${m.comanda ? 'ocupada' : 'livre'}`}>
+            <button
+              className="mesa-abrir"
+              onClick={() => (m.comanda ? nav(`/comandas/${m.comanda.id}`) : abrir.mutate(m.id))}
+            >
+              <span className="num">{m.numero}</span>
+              {m.anotacao && <small className="anotacao">{m.anotacao}</small>}
+              {m.comanda ? (
+                <>
+                  <small>{m.comanda.nomeCliente ?? 'Ocupada'}</small>
+                  <b>{formatarBRL(m.comanda.total)}</b>
+                </>
+              ) : (
+                <small>Livre</small>
+              )}
+            </button>
+            {user?.papel === 'ADMIN' && (
+              <button
+                className="mesa-anotar"
+                onClick={() => {
+                  const anotacao = window.prompt('Anotação da mesa (até 60 caracteres)', m.anotacao ?? '');
+                  if (anotacao !== null) anotar.mutate({ mesaId: m.id, anotacao });
+                }}
+                disabled={anotar.isPending}
+              >
+                {m.anotacao ? 'Editar anotação' : 'Anotar mesa'}
+              </button>
             )}
-          </button>
+          </div>
         ))}
       </div>
     </>

@@ -1,6 +1,7 @@
-import { Controller, Get, Post, UseGuards } from '@nestjs/common';
-import type { JwtPayload } from '@bar/shared';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { mesaAnotacaoSchema, type JwtPayload, type MesaAnotacaoDto } from '@bar/shared';
 import { CurrentUser, JwtAuthGuard, Roles, RolesGuard } from '../common/auth';
+import { ZodPipe } from '../common/zod.pipe';
 import { MesasService } from './mesas.service';
 
 @Controller('mesas')
@@ -16,6 +17,15 @@ export class MesasController {
   @Post() @Roles('ADMIN')
   criar(@CurrentUser() u: JwtPayload) {
     return this.service.criar(u.estabelecimentoId);
+  }
+
+  @Patch(':id/anotacao') @Roles('ADMIN')
+  atualizarAnotacao(
+    @CurrentUser() u: JwtPayload,
+    @Param('id') id: string,
+    @Body(new ZodPipe(mesaAnotacaoSchema)) dto: MesaAnotacaoDto,
+  ) {
+    return this.service.atualizarAnotacao(u.estabelecimentoId, id, dto);
   }
 
 }

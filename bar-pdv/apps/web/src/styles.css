@@ -32,10 +32,13 @@ main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
 .login label { display: grid; gap: .3rem; color: var(--muted); font-size: .9rem; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .75rem; }
-.mesa { display: flex; flex-direction: column; align-items: flex-start; gap: .2rem; min-height: 110px; padding: 1rem; border-width: 2px; text-align: left; }
+.mesa { display: flex; flex-direction: column; align-items: stretch; gap: .2rem; min-height: 110px; padding: .5rem; border: 2px solid var(--line); border-radius: 8px; background: var(--panel); }
+.mesa-abrir { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: .2rem; padding: .5rem; border: 0; background: transparent; text-align: left; }
+.mesa-anotar { align-self: flex-end; padding: .2rem .45rem; font-size: .78rem; }
 .mesa .num { font-size: 2rem; font-weight: 700; line-height: 1; }
 .mesa.livre { border-color: var(--livre); } .mesa.livre small { color: var(--livre); }
 .mesa.ocupada { border-color: var(--ocupada); background: #221f15; } .mesa.ocupada small { color: var(--ocupada); }
+.mesa .anotacao { color: var(--text); font-weight: 600; }
 
 .comanda { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; align-items: start; }
 @media (max-width: 900px) { .comanda { grid-template-columns: 1fr; } }

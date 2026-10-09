@@ -101,6 +101,7 @@ model Mesa {
   id                String @id @default(cuid())
   estabelecimentoId String
   numero            Int
+  anotacao          String?
 
   estabelecimento Estabelecimento @relation(fields: [estabelecimentoId], references: [id])
   comandas        Comanda[]

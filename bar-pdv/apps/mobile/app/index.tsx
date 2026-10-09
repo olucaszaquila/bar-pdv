@@ -42,6 +42,7 @@ export default function Mesas() {
         renderItem={({ item: m }) => (
           <Pressable onPress={() => tocar(m)} style={[s.mesa, { borderColor: m.comanda ? cores.ocupada : cores.livre }]}>
             <Text style={s.num}>{m.numero}</Text>
+            {m.anotacao && <Text style={s.anotacao} numberOfLines={1}>{m.anotacao}</Text>}
             <Text style={{ color: m.comanda ? cores.ocupada : cores.livre }} numberOfLines={1}>
               {m.comanda ? m.comanda.nomeCliente ?? 'Ocupada' : 'Livre'}
             </Text>
@@ -56,5 +57,6 @@ export default function Mesas() {
 const s = StyleSheet.create({
   mesa: { flex: 1 / 3, margin: 6, aspectRatio: 1, borderWidth: 2, borderRadius: 14, backgroundColor: cores.panel, padding: 10, justifyContent: 'center' },
   num: { color: cores.text, fontSize: 30, fontWeight: '700' },
+  anotacao: { color: cores.text, fontWeight: '600' },
   total: { color: cores.text, fontWeight: '600', marginTop: 2 },
 });

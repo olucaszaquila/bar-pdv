@@ -48,6 +48,8 @@ export const abrirComandaSchema = z.object({
   nomeCliente: z.string().max(60).optional(),
 });
 
+export const mesaAnotacaoSchema = z.object({ anotacao: z.string().max(60) });
+
 export const lancarItensSchema = z.object({
   itens: z
     .array(
@@ -76,6 +78,7 @@ export type CategoriaDto = z.infer<typeof categoriaSchema>;
 export type ProdutoDto = z.infer<typeof produtoSchema>;
 export type ProdutoUpdateDto = z.infer<typeof produtoUpdateSchema>;
 export type AbrirComandaDto = z.infer<typeof abrirComandaSchema>;
+export type MesaAnotacaoDto = z.infer<typeof mesaAnotacaoSchema>;
 export type LancarItensDto = z.infer<typeof lancarItensSchema>;
 export type StatusItemDto = z.infer<typeof statusItemSchema>;
 export type CancelarItemDto = z.infer<typeof cancelarItemSchema>;
@@ -100,6 +103,7 @@ export interface CategoriaComProdutos {
 export interface MesaResumo {
   id: string;
   numero: number;
+  anotacao: string | null;
   comanda: null | { id: string; nomeCliente: string | null; abertaEm: string; total: number };
 }
 export interface ItemResumo {
