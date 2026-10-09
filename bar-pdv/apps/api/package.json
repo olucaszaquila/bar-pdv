@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
+    "test": "tsx --test src/auth/auth.service.spec.ts src/cardapio/cardapio.service.spec.ts src/mesas/mesas.service.spec.ts src/comandas/comandas.service.spec.ts",
     "start": "node dist/main.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
