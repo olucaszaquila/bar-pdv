@@ -6,8 +6,13 @@ const prisma = new PrismaClient();
 type Linha = [string, number, 'BAR' | 'COZINHA'];
 
 async function main() {
-  if (await prisma.estabelecimento.count()) {
-    console.log('Seed já aplicado.');
+  const existente = await prisma.estabelecimento.findFirst();
+  if (existente) {
+    await prisma.mesa.createMany({
+      data: Array.from({ length: 50 }, (_, i) => ({ estabelecimentoId: existente.id, numero: i + 1 })),
+      skipDuplicates: true,
+    });
+    console.log('Seed já aplicado; mesas conferidas até a 50.');
     return;
   }
   const est = await prisma.estabelecimento.create({ data: { nome: 'Bar Demo' } });
@@ -46,7 +51,7 @@ async function main() {
   }
 
   await prisma.mesa.createMany({
-    data: Array.from({ length: 12 }, (_, i) => ({ estabelecimentoId: est.id, numero: i + 1 })),
+    data: Array.from({ length: 50 }, (_, i) => ({ estabelecimentoId: est.id, numero: i + 1 })),
   });
   console.log('Seed ok. Login: admin@demo.com / garcom@demo.com / cozinha@demo.com / caixa@demo.com  (senha 123456)');
 }
