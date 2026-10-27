@@ -7,7 +7,10 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "noEmit": true,
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "paths": {
+      "react": ["./node_modules/@types/react"]
+    }
   },
   "include": ["src"]
 }

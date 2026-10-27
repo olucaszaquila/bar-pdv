@@ -55,7 +55,19 @@ main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
 .totais > div { display: flex; justify-content: space-between; padding: .3rem 0; color: var(--muted); }
 .totais .total { color: var(--text); font-size: 1.4rem; font-weight: 700; border-top: 1px solid var(--line); margin-top: .4rem; padding-top: .6rem; }
 .mini { width: 4rem; padding: .2rem .4rem; margin: 0 .2rem; }
-.fechar { display: flex; gap: .75rem; margin-top: 1rem; } .fechar .primary { flex: 1; }
+.fechar { display: grid; gap: .75rem; margin-top: 1rem; }
+.fechar h2 { margin: 0; }
+.linha-pagamento { display: grid; grid-template-columns: minmax(140px, 1fr) minmax(120px, .8fr) auto; gap: .5rem; align-items: end; }
+.linha-pagamento label, .dinheiro-recebido { display: grid; gap: .3rem; color: var(--muted); font-size: .85rem; }
+.linha-pagamento select, .linha-pagamento input, .dinheiro-recebido input { width: 100%; }
+.resumo-pagamento, .pagamentos-registrados > div { display: flex; justify-content: space-between; gap: .75rem; color: var(--muted); }
+.dinheiro-recebido small { color: var(--pronto); }
+.dinheiro-recebido small.erro { color: var(--perigo); }
+.fechar > .primary { width: 100%; }
+.pagamentos-registrados { margin-top: 1rem; }
+.pagamentos-registrados h2 { margin-bottom: .5rem; }
+.pagamentos-registrados > div { padding: .25rem 0; text-transform: capitalize; }
+@media (max-width: 520px) { .linha-pagamento { grid-template-columns: 1fr 1fr; } .linha-pagamento .ghost { grid-column: 2; justify-self: end; } }
 
 aside { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 1rem; }
 .produto { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .45rem 0; }

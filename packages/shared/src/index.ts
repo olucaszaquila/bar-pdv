@@ -71,6 +71,7 @@ export const fecharComandaSchema = z.object({
   pagamentos: z
     .array(z.object({ forma: z.enum(FORMAS_PAGAMENTO), valorCentavos: z.number().int().positive() }))
     .min(1),
+  dinheiroRecebidoCentavos: z.number().int().min(0).optional(),
 });
 
 export type LoginDto = z.infer<typeof loginSchema>;
@@ -125,6 +126,12 @@ export interface Totais {
   taxa: number;
   total: number;
 }
+export interface PagamentoResumo {
+  id: string;
+  forma: FormaPagamento;
+  valorCentavos: number;
+  criadoEm: string;
+}
 export interface ComandaDetalhe {
   id: string;
   status: 'ABERTA' | 'FECHADA';
@@ -133,6 +140,7 @@ export interface ComandaDetalhe {
   mesa: { id: string; numero: number };
   garcom: { nome: string };
   itens: ItemResumo[];
+  pagamentos: PagamentoResumo[];
   totais: Totais;
 }
 

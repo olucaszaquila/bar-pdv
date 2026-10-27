@@ -146,8 +146,25 @@ export class ComandasService {
     const taxa = dto.taxaServicoPct ?? c.taxaServicoPct;
     const { total } = calcularTotais(c.itens, taxa);
     const pago = dto.pagamentos.reduce((s, p) => s + p.valorCentavos, 0);
+    const dinheiroAlocado = dto.pagamentos
+      .filter((p) => p.forma === 'DINHEIRO')
+      .reduce((s, p) => s + p.valorCentavos, 0);
     if (total === 0) throw new BadRequestException('Comanda sem itens para cobrar');
-    if (pago < total) throw new BadRequestException('Pagamento menor que o total da conta');
+
+    let troco: number;
+    if (dto.dinheiroRecebidoCentavos !== undefined) {
+      if (pago !== total) throw new BadRequestException('A soma dos pagamentos deve ser igual ao total da conta');
+      if (dto.dinheiroRecebidoCentavos < dinheiroAlocado) {
+        throw new BadRequestException('Dinheiro recebido menor que o valor pago em espécie');
+      }
+      if (dinheiroAlocado === 0 && dto.dinheiroRecebidoCentavos > 0) {
+        throw new BadRequestException('Informe dinheiro recebido somente quando houver pagamento em espécie');
+      }
+      troco = dto.dinheiroRecebidoCentavos - dinheiroAlocado;
+    } else {
+      if (pago < total) throw new BadRequestException('Pagamento menor que o total da conta');
+      troco = pago - total;
+    }
 
     await this.prisma.$transaction(async (tx) => {
       await tx.pagamento.createMany({
@@ -160,12 +177,14 @@ export class ComandasService {
       await this.registrar(tx, user, comandaId, 'COMANDA_FECHADA', {
         total,
         pago,
+        troco,
+        dinheiroRecebidoCentavos: dto.dinheiroRecebidoCentavos,
         taxaServicoPct: taxa,
         formas: dto.pagamentos.map((p) => p.forma),
       });
     });
     this.notificar(user.estabelecimentoId);
-    return { total, pago, troco: pago - total };
+    return { total, pago, troco };
   }
 
   eventosDaComanda(user: JwtPayload, comandaId: string) {

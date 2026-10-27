@@ -74,6 +74,45 @@ test('fechar persiste pagamento, fecha comanda e retorna troco', async () => {
   assert.ok(chamadas.evento);
 });
 
+test('fechar calcula troco em pagamento dividido com dinheiro', async () => {
+  const tx = {
+    pagamento: { createMany: async () => {} },
+    comanda: { update: async () => {} },
+    eventoComanda: { create: async () => {} },
+  };
+  const service = criarService({
+    comanda: { findFirst: async () => ({
+      id: 'c1', status: 'ABERTA', taxaServicoPct: 0,
+      itens: [{ quantidade: 1, precoCentavos: 1000, status: 'PENDENTE' }],
+    }) },
+    $transaction: async (callback: (transaction: typeof tx) => Promise<void>) => callback(tx),
+  });
+
+  const resultado = await service.fechar(garcom, 'c1', {
+    pagamentos: [
+      { forma: 'DINHEIRO', valorCentavos: 600 },
+      { forma: 'PIX', valorCentavos: 400 },
+    ],
+    dinheiroRecebidoCentavos: 1000,
+  });
+
+  assert.deepEqual(resultado, { total: 1000, pago: 1000, troco: 400 });
+});
+
+test('fechar rejeita pagamentos divididos que nao somam o total', async () => {
+  const service = criarService({
+    comanda: { findFirst: async () => ({
+      id: 'c1', status: 'ABERTA', taxaServicoPct: 0,
+      itens: [{ quantidade: 1, precoCentavos: 1000, status: 'PENDENTE' }],
+    }) },
+  });
+
+  await assert.rejects(service.fechar(garcom, 'c1', {
+    pagamentos: [{ forma: 'PIX', valorCentavos: 999 }],
+    dinheiroRecebidoCentavos: 0,
+  }), BadRequestException);
+});
+
 test('atualizarStatus restringe transições conforme o papel do usuário', async (t) => {
   async function executar(papel: JwtPayload['papel'], status: 'EM_PREPARO' | 'ENTREGUE') {
     let transacionou = false;

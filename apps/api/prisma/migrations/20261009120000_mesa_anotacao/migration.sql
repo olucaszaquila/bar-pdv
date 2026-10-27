@@ -1,1 +1,1 @@
-ALTER TABLE "Mesa" ADD COLUMN "anotacao" TEXT;ALTER TABLE "Mesa" ADD COLUMN "anotacao" TEXT;
+ALTER TABLE "Mesa" ADD COLUMN "anotacao" TEXT;
