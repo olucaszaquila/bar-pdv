@@ -7,11 +7,16 @@ import { CardapioModule } from './cardapio/cardapio.module';
 import { MesasModule } from './mesas/mesas.module';
 import { ComandasModule } from './comandas/comandas.module';
 
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+  throw new Error('JWT_SECRET não configurado. Defina essa variável antes de iniciar a API.');
+}
+
 @Module({
   imports: [
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET ?? 'dev-secret',
+      secret: jwtSecret,
       signOptions: { expiresIn: '12h' },
     }),
     PrismaModule,
